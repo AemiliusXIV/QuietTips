@@ -1,0 +1,26 @@
+{
+  "Author": "AemiliusXIV",
+  "Name": "Quiet Tips",
+  "InternalName": "QuietTips",
+  "Punchline": "Hide tooltips when you don't want them, keep them when you do.",
+  "Description": "Stops action, item, pop-up help and crossbar hint tooltips from cluttering the screen. Toggle each type independently for in-combat and out-of-combat, set a duty override (follow combat rules, always show, or always hide while in an instance), and keep an exception so tooltips come back automatically whenever an inventory, armoury or character window is open. Original game settings are restored when the plugin is disabled. Command: /quiettips (open settings).",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "tooltip",
+    "ui",
+    "qol",
+    "combat",
+    "declutter"
+  ],
+  "CategoryTags": [
+    "Utility"
+  ],
+  "RepoUrl": "https://github.com/AemiliusXIV/QuietTips",
+  "DalamudApiLevel": 15,
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": true,
+  "LoadPriority": 0,
+  "AcceptsFeedback": true,
+  "Changelog": "Initial release."
+}
