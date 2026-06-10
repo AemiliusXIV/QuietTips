@@ -1,6 +1,8 @@
-using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
+using Dalamud.Game.Gui.Dtr;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -12,24 +14,26 @@ namespace QuietTips;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    public string Name => "Quiet Tips";
-
     private const string ConfigCommand = "/quiettips";
 
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
     [PluginService] internal static IGameConfig GameConfig { get; private set; } = null!;
+    [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
     [PluginService] internal static ICondition Condition { get; private set; } = null!;
-    [PluginService] internal static IAddonLifecycle AddonLifecycle { get; private set; } = null!;
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
+    [PluginService] internal static IToastGui ToastGui { get; private set; } = null!;
+    [PluginService] internal static IDtrBar DtrBar { get; private set; } = null!;
 
     internal Configuration Config { get; }
     internal WindowSystem WindowSystem { get; } = new("QuietTips");
     internal ConfigWindow ConfigWindow { get; }
     internal TooltipVisibilityController Controller { get; }
+
+    private IDtrBarEntry? dtrEntry;
 
     public Plugin()
     {
@@ -49,6 +53,10 @@ public sealed class Plugin : IDalamudPlugin
             HelpMessage = "Open Quiet Tips settings. '/quiettips toggle|on|off' switches it without opening the window.",
             ShowInHelp = true,
         });
+
+        dtrEntry = DtrBar.Get("QuietTips");
+        dtrEntry.OnClick = _ => SetEnabled(!Config.Enabled);
+        UpdateDtrEntry();
     }
 
     public void Dispose()
@@ -60,6 +68,7 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(ConfigCommand);
         WindowSystem.RemoveAllWindows();
 
+        dtrEntry?.Remove();
         Controller.Dispose();
     }
 
@@ -89,6 +98,23 @@ public sealed class Plugin : IDalamudPlugin
         Config.Enabled = enabled;
         Config.Save();
         Controller.OnConfigChanged();
-        ChatGui.Print($"[Quiet Tips] {(enabled ? "Enabled" : "Disabled")}.");
+        UpdateDtrEntry();
+
+        if (Config.ShowToastOnToggle)
+            ToastGui.ShowNormal($"Quiet Tips {(enabled ? "enabled" : "disabled")}.");
+        else
+            ChatGui.Print($"[Quiet Tips] {(enabled ? "Enabled" : "Disabled")}.");
+    }
+
+    internal void UpdateDtrEntry()
+    {
+        if (dtrEntry == null) return;
+        var show = Config.ShowStatusBarIcon && Config.Enabled;
+        dtrEntry.Shown = show;
+        if (show)
+        {
+            dtrEntry.Text = new SeString(new TextPayload("Quiet Tips"));
+            dtrEntry.Tooltip = new SeString(new TextPayload("Quiet Tips is active. Click to disable."));
+        }
     }
 }
