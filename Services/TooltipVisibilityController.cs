@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Plugin.Services;
 
 namespace QuietTips.Services;
 
@@ -31,8 +29,6 @@ public sealed class TooltipVisibilityController : IDisposable
         "ArmouryBoard", "Character", "CharacterInspect", "Cabinet", "CabinetWithdraw",
     };
 
-    private readonly HashSet<string> openMenus = new();
-
     private bool originalsCaptured;
     private bool originalAction, originalItem, originalPopUp, originalCrossbar;
 
@@ -41,8 +37,7 @@ public sealed class TooltipVisibilityController : IDisposable
         this.config = config;
 
         Plugin.Condition.ConditionChange += OnConditionChange;
-        Plugin.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, InventoryAddons, OnMenuSetup);
-        Plugin.AddonLifecycle.RegisterListener(AddonEvent.PreFinalize, InventoryAddons, OnMenuFinalize);
+        Plugin.Framework.Update += OnFrameworkUpdate;
         Plugin.ClientState.Login += OnLogin;
 
         if (Plugin.ClientState.IsLoggedIn)
@@ -55,7 +50,7 @@ public sealed class TooltipVisibilityController : IDisposable
     public void Dispose()
     {
         Plugin.Condition.ConditionChange -= OnConditionChange;
-        Plugin.AddonLifecycle.UnregisterListener(OnMenuSetup, OnMenuFinalize);
+        Plugin.Framework.Update -= OnFrameworkUpdate;
         Plugin.ClientState.Login -= OnLogin;
 
         // Leave the game the way we found it.
@@ -68,8 +63,22 @@ public sealed class TooltipVisibilityController : IDisposable
     /// </summary>
     public void OnConfigChanged() => Plugin.Framework.RunOnFrameworkThread(Recompute);
 
-    /// <summary>True when an inventory-type window is forcing tooltips back on.</summary>
-    public bool MenuExceptionActive => config.ShowInInventoryMenus && openMenus.Count > 0;
+    /// <summary>
+    /// True when an inventory-type window is forcing tooltips back on.
+    /// Queried live from the game rather than tracked via lifecycle events, so it
+    /// can't get stuck if an addon closes without firing PreFinalize.
+    /// </summary>
+    public bool MenuExceptionActive
+    {
+        get
+        {
+            if (!config.ShowInInventoryMenus) return false;
+            foreach (var name in InventoryAddons)
+                if (Plugin.GameGui.GetAddonByName(name) != nint.Zero)
+                    return true;
+            return false;
+        }
+    }
 
     /// <summary>
     /// Whether a tooltip with these in/out-of-combat hide settings is hidden under
@@ -87,39 +96,24 @@ public sealed class TooltipVisibilityController : IDisposable
         Recompute();
     }
 
+    private void OnFrameworkUpdate(IFramework _) => Recompute();
+
     private void OnConditionChange(ConditionFlag flag, bool value)
     {
         if (flag == ConditionFlag.LoggingOut && value)
         {
             RestoreOriginals();
             originalsCaptured = false;
-            openMenus.Clear();
-            return;
         }
-
-        if (flag is ConditionFlag.InCombat or ConditionFlag.BoundByDuty)
-            Recompute();
-    }
-
-    private void OnMenuSetup(AddonEvent type, AddonArgs args)
-    {
-        openMenus.Add(args.AddonName);
-        Recompute();
-    }
-
-    private void OnMenuFinalize(AddonEvent type, AddonArgs args)
-    {
-        openMenus.Remove(args.AddonName);
-        Recompute();
     }
 
     private void CaptureOriginals()
     {
         if (originalsCaptured) return;
         if (!Plugin.GameConfig.UiControl.TryGetBool(ActionFlag, out originalAction)) return;
-        Plugin.GameConfig.UiControl.TryGetBool(ItemFlag, out originalItem);
-        Plugin.GameConfig.UiControl.TryGetBool(PopUpFlag, out originalPopUp);
-        Plugin.GameConfig.UiConfig.TryGetBool(CrossbarFlag, out originalCrossbar);
+        if (!Plugin.GameConfig.UiControl.TryGetBool(ItemFlag, out originalItem)) return;
+        if (!Plugin.GameConfig.UiControl.TryGetBool(PopUpFlag, out originalPopUp)) return;
+        if (!Plugin.GameConfig.UiConfig.TryGetBool(CrossbarFlag, out originalCrossbar)) return;
         originalsCaptured = true;
     }
 
@@ -144,7 +138,7 @@ public sealed class TooltipVisibilityController : IDisposable
 
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
         var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
-        var menuOpen = config.ShowInInventoryMenus && openMenus.Count > 0;
+        var menuOpen = MenuExceptionActive;
 
         SetControl(ActionFlag, !ShouldHide(config.HideActionInCombat, config.HideActionOoc, inCombat, inDuty, menuOpen));
         SetControl(ItemFlag, !ShouldHide(config.HideItemInCombat, config.HideItemOoc, inCombat, inDuty, menuOpen));

@@ -22,5 +22,5 @@
   "CanUnloadAsync": true,
   "LoadPriority": 0,
   "AcceptsFeedback": true,
-  "Changelog": "Initial release."
+  "Changelog": "Menu exception no longer stays stuck when a window closes without a proper lifecycle event; tooltips hide again as expected once windows are gone. Toggle feedback is now a toast notification by default - switch back to chat in settings if you prefer. Optional server info bar icon added (off by default), click it to toggle the plugin."
 }

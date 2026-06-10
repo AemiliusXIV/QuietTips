@@ -19,7 +19,7 @@ public sealed class ConfigWindow : Window, IDisposable
     public ConfigWindow(Plugin plugin) : base("Quiet Tips Settings##qt_cfg")
     {
         this.plugin = plugin;
-        Size = new Vector2(460, 440);
+        Size = new Vector2(460, 520);
         SizeCondition = ImGuiCond.FirstUseEver;
     }
 
@@ -94,6 +94,29 @@ public sealed class ConfigWindow : Window, IDisposable
                 "over the rules above.");
 
         ImGui.EndDisabled();
+
+        DrawSectionHeader("Toggle feedback");
+        var showToast = Config.ShowToastOnToggle;
+        if (ImGui.Checkbox("Show toast notification on toggle", ref showToast))
+        {
+            Config.ShowToastOnToggle = showToast;
+            Commit();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(
+                "Shows the in-game splash notification when the plugin is toggled on or off via command.\n" +
+                "When off, a chat message is shown instead.");
+
+        var showBar = Config.ShowStatusBarIcon;
+        if (ImGui.Checkbox("Show icon in server info bar", ref showBar))
+        {
+            Config.ShowStatusBarIcon = showBar;
+            Commit();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(
+                "Adds a small entry to the server info bar at the top of the screen while the plugin\n" +
+                "is active. Click it to toggle the plugin off.");
     }
 
     private void DrawTypeRow(
@@ -152,6 +175,7 @@ public sealed class ConfigWindow : Window, IDisposable
     {
         Config.Save();
         plugin.Controller.OnConfigChanged();
+        Plugin.Framework.RunOnFrameworkThread(plugin.UpdateDtrEntry);
     }
 
     private static void DrawSectionHeader(string text)
