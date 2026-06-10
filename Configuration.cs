@@ -51,6 +51,10 @@ public class Configuration : IPluginConfiguration
     /// </summary>
     public bool ShowInInventoryMenus { get; set; } = true;
 
+    // Toggle feedback
+    public bool ShowToastOnToggle { get; set; } = true;
+    public bool ShowStatusBarIcon { get; set; } = false;
+
     [NonSerialized]
     private IDalamudPluginInterface? pluginInterface;
 
