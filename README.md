@@ -4,6 +4,16 @@ A Dalamud plugin for FFXIV that keeps tooltips out of your way. Hide action, ite
 pop-up and crossbar hint tooltips on your own terms, and get them back when you
 actually need them.
 
+## Installation
+
+1. In-game, open **ESC → Dalamud Settings → Experimental → Custom Plugin Repositories** and add:
+   ```
+   https://aemiliusxiv.github.io/DalamudPlugins/pluginmaster.json
+   ```
+2. Open the Plugin Installer (`/xlplugins`) and search for **Quiet Tips**.
+
+Quiet Tips is part of the [AemiliusXIV plugin repository](https://github.com/AemiliusXIV/DalamudPlugins). Visit that page for an overview of all available plugins.
+
 ## What it does
 
 Each tooltip type can be hidden separately for **in combat** and **out of combat**,
@@ -32,15 +42,6 @@ captured on login and restored when the plugin is disabled or unloaded.
 If you also run Simple Tweaks' "Hide Tooltips in Combat", both plugins write the same
 game options and will fight over them. Pick one.
 
-## Building
-
-```
-dotnet build -c Release
-```
-
-The build copies the output into `%AppData%\XIVLauncher\customPlugins\QuietTips`
-for dev loading.
-
 ## Privacy
 
 Quiet Tips runs entirely on your machine. It reads and writes the game's own tooltip display
@@ -49,8 +50,8 @@ PC, or sent over the network, and there is no telemetry.
 
 ## License
 
-See [LICENSE](LICENSE). The source is available under a forks-only license: fork and modify it as
-a standalone repository that credits the original, but the code may not be lifted into other
-projects.
+Copyright (c) 2026 AemiliusXIV
 
-This plugin is not affiliated with or endorsed by Square Enix Co., Ltd. Square Enix does not permit the use of third-party plugins and this plugin may violate the FINAL FANTASY XIV Terms of Service. Use of this plugin is entirely at your own risk. FINAL FANTASY XIV is a registered trademark of Square Enix Holdings Co., Ltd.
+This project is source-available. You may fork and modify it, but the source code may not be copied into other projects or plugins, in source or compiled form, without explicit written permission. Forks must preserve this license and credit the original author. See the [LICENSE](LICENSE) file for full terms.
+
+This project is not affiliated with or endorsed by Square Enix Co., Ltd. The use of third-party tools is prohibited under the FINAL FANTASY XIV Terms of Service; use of this plugin is entirely at your own risk. FINAL FANTASY XIV is a registered trademark of Square Enix Holdings Co., Ltd.
