@@ -27,8 +27,12 @@ On top of that:
 - **Inventory exception**: whenever an Inventory, Armoury Chest or Character window is
   open, hidden tooltips come back automatically so you can still inspect gear. This
   always takes priority.
+- **Server info bar**: an optional "Quiet Tips" entry shows in the server info bar while
+  the plugin is active; clicking it switches the plugin off.
 
-Type `/quiettips` to open the settings.
+Type `/quiettips` to open the settings. `/quiettips toggle`, `/quiettips on` and
+`/quiettips off` switch the plugin without opening the window. The on/off confirmation
+arrives as a toast or a chat message, whichever you pick in the settings.
 
 ## How it works
 

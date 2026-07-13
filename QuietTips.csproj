@@ -1,7 +1,7 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
 
   <PropertyGroup>
-    <Version>1.0.1.0</Version>
+    <Version>1.0.2.0</Version>
     <Description>Hide action, item, pop-up and crossbar tooltips on your own terms: separately in and out of combat, with a duty override and an exception that brings them back while an inventory or character window is open.</Description>
     <PackageProjectUrl>https://github.com/AemiliusXIV/QuietTips</PackageProjectUrl>
     <Nullable>enable</Nullable>

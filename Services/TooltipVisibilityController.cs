@@ -32,6 +32,12 @@ public sealed class TooltipVisibilityController : IDisposable
     private bool originalsCaptured;
     private bool originalAction, originalItem, originalPopUp, originalCrossbar;
 
+    // Set when LoggingOut fires, cleared on the next login. IsLoggedIn stays true
+    // for a while during the logout sequence, so without this the per-frame
+    // Recompute would re-apply the hide-values right after RestoreOriginals and
+    // the game would save them as the character's own settings.
+    private bool loggingOut;
+
     public TooltipVisibilityController(Configuration config)
     {
         this.config = config;
@@ -92,6 +98,7 @@ public sealed class TooltipVisibilityController : IDisposable
 
     private void OnLogin()
     {
+        loggingOut = false;
         CaptureOriginals();
         Recompute();
     }
@@ -102,6 +109,7 @@ public sealed class TooltipVisibilityController : IDisposable
     {
         if (flag == ConditionFlag.LoggingOut && value)
         {
+            loggingOut = true;
             RestoreOriginals();
             originalsCaptured = false;
         }
@@ -128,6 +136,7 @@ public sealed class TooltipVisibilityController : IDisposable
 
     private void Recompute()
     {
+        if (loggingOut) return;
         if (!Plugin.ClientState.IsLoggedIn) return;
 
         if (!config.Enabled)

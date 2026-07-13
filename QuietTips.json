@@ -22,5 +22,5 @@
   "CanUnloadAsync": true,
   "LoadPriority": 0,
   "AcceptsFeedback": true,
-  "Changelog": "Tooltips now hide again after closing inventory or character windows - they could get stuck showing in some cases before. When toggling the plugin on or off, you'll see a toast notification rather than a chat message by default. New option in settings: show a small icon in the server info bar that lets you toggle the plugin with a click."
+  "Changelog": "Fixed a bug where logging out with the plugin active could permanently overwrite your tooltip settings with the plugin's hidden values."
 }
